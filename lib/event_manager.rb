@@ -58,6 +58,7 @@ contents = CSV.open(
 )
 
 registering_hours = Hash.new(0)
+registering_days = Hash.new(0)
 
 contents.each do |row|
   id = row[0]
@@ -69,6 +70,7 @@ contents.each do |row|
 
   reg_date = Time.strptime(row[:regdate], "%m/%d/%Y %k:%M")
   registering_hours["#{reg_date.hour}:00"] += 1
+  registering_days[reg_date.strftime("%A")] += 1
 
   puts "Processing request ##{id}"
   form_letter = erb_template.result(binding)
@@ -77,4 +79,6 @@ end
 
 puts 'Event Manager Finished Processing.'
 most_active_hour = find_highest(registering_hours)
-puts "The most active hour of each day was: #{most_active_hour}, with #{registering_hours[most_active_hour]} people registering in the hour."
+puts "The most active hour was: #{most_active_hour}, with #{registering_hours[most_active_hour]} registrations."
+most_active_day = find_highest(registering_days)
+puts "The most active day was: #{most_active_day}, with #{registering_days[most_active_day]} registrations."
