@@ -6,6 +6,16 @@ def clean_zipcode(zipcode)
   zipcode.to_s.rjust(5, '0')[0..4]
 end
 
+def clean_phone_number(number)
+  digits = number.gsub(/[^\d]/, '')
+  if digits.length < 10 || digits.length > 11 || digits.length == 11 && digits[0] != '1'
+    'Invalid phone number.'
+  else
+    digits.delete_prefix!('1') if digits[0] == '1'
+    digits
+  end # return a standarized version of the number parameter
+end
+
 def legislators_by_zipcode(zip)
   civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
   civic_info.key = 'AIzaSyClRzDqDh5MsXwnCWi0kOiiBivP6JsSyBw'
@@ -21,7 +31,7 @@ def legislators_by_zipcode(zip)
   end
 end
 
-def save_thank_you_letter(if, form_letter)
+def save_thank_you_letter(id, form_letter)
   Dir.mkdir('output') unless Dir.exist?('output')
 
   filename = "output/thanks_#{id}.html"
