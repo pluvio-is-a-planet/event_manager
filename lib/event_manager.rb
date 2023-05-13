@@ -1,6 +1,7 @@
 require 'csv'
 require 'google/apis/civicinfo_v2'
 require 'erb'
+require 'time'
 
 def clean_zipcode(zipcode)
   zipcode.to_s.rjust(5, '0')[0..4]
@@ -41,6 +42,10 @@ def save_thank_you_letter(id, form_letter)
   end
 end
 
+def find_highest(hash)
+  hash.key(hash.values.max)
+end
+
 puts 'Event Manager Initialized!'
 
 template_letter = File.read('form_letter.html')
@@ -52,15 +57,24 @@ contents = CSV.open(
   header_converters: :symbol
 )
 
+registering_hours = Hash.new(0)
+
 contents.each do |row|
   id = row[0]
   name = row[:first_name]
 
   zipcode = clean_zipcode(row[:zipcode])
-
+  phone_number = clean_phone_number(row[:homephone])
   legislators = legislators_by_zipcode(zipcode)
 
-  form_letter = erb_template.result(binding)
+  reg_date = Time.strptime(row[:regdate], "%m/%d/%Y %k:%M")
+  registering_hours["#{reg_date.hour}:00"] += 1
 
+  puts "Processing request ##{id}"
+  form_letter = erb_template.result(binding)
   save_thank_you_letter(id, form_letter)
 end
+
+puts 'Event Manager Finished Processing.'
+most_active_hour = find_highest(registering_hours)
+puts "The most active hour of each day was: #{most_active_hour}, with #{registering_hours[most_active_hour]} people registering in the hour."
