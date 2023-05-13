@@ -60,7 +60,7 @@ contents = CSV.open(
 registering_hours = Hash.new(0)
 registering_days = Hash.new(0)
 
-contents.each do |row|
+contents.each_with_index do |row, index|
   id = row[0]
   name = row[:first_name]
 
@@ -72,7 +72,7 @@ contents.each do |row|
   registering_hours["#{reg_date.hour}:00"] += 1
   registering_days[reg_date.strftime("%A")] += 1
 
-  puts "Processing request ##{id}"
+  puts "Processing request ##{index}"
   form_letter = erb_template.result(binding)
   save_thank_you_letter(id, form_letter)
 end
